@@ -19,7 +19,14 @@ namespace CricketPlayers.Controllers
         // GET: Players
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Player.ToListAsync());
+            return View(await _context.Player.OrderBy(player => player.Name).Take(100).ToListAsync());
+        }
+
+        // GET: Players/Search/rohit
+        public async Task<IActionResult> Search(string playerName)
+        {
+            var listAsync = await _context.Player.Where(player => player.FullName.Contains(playerName)).ToListAsync();
+            return View(listAsync);
         }
 
         // GET: Players/Details/5

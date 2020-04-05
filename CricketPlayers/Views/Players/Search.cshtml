@@ -1,0 +1,93 @@
+﻿@model IEnumerable<CricketPlayers.Data.Entities.Player>
+
+@{
+    ViewData["Title"] = "Search";
+}
+
+<h2>Players</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Search">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <input class="form-control" name="playerName"/>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Search" class="btn btn-default" />         
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FullName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PlayingRole)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FieldingPosition)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateOfBirth)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.BattingStyle)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.BowlingStyle)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CricInfoId)
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PlayingRole)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FieldingPosition)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateOfBirth)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BattingStyle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlingStyle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CricInfoId)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<p> <a asp-action="Index">Back to List</a> </p>
