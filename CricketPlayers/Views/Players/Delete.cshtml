@@ -1,4 +1,4 @@
-﻿@model CricketPlayers.Models.Player
+﻿@model CricketPlayers.Data.Entities.Player
 
 @{
     ViewData["Title"] = "Delete";
@@ -28,6 +28,12 @@
         </dt>
         <dd>
             @Html.DisplayFor(model => model.PlayingRole)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.FieldingPosition)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.FieldingPosition)
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.DateOfBirth)

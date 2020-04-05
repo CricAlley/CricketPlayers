@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using CricketPlayers.Data;
+using CricketPlayers.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using CricketPlayers.Models;
 
 namespace CricketPlayers.Controllers
 {
@@ -53,7 +51,7 @@ namespace CricketPlayers.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,FullName,PlayingRole,DateOfBirth,BattingStyle,BowlingStyle,CricInfoId")] Player player)
+        public async Task<IActionResult> Create([Bind("Id,Name,FullName,PlayingRole,FieldingPosition,DateOfBirth,BattingStyle,BowlingStyle,CricInfoId")] Player player)
         {
             if (ModelState.IsValid)
             {
@@ -85,7 +83,7 @@ namespace CricketPlayers.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,FullName,PlayingRole,DateOfBirth,BattingStyle,BowlingStyle,CricInfoId")] Player player)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,FullName,PlayingRole,FieldingPosition,DateOfBirth,BattingStyle,BowlingStyle,CricInfoId")] Player player)
         {
             if (id != player.Id)
             {
