@@ -24,33 +24,36 @@
 
 <table class="table">
     <thead>
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FullName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.PlayingRole)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FieldingPosition)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.DateOfBirth)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.BattingStyle)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.BowlingStyle)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CricInfoId)
-        </th>
-        <th></th>
-    </tr>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PlayingRole)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FieldingPosition)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateOfBirth)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BattingStyle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BowlingStyle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CricInfoId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th></th>
+        </tr>
     </thead>
     <tbody>
     @foreach (var item in Model)
@@ -79,6 +82,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CricInfoId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

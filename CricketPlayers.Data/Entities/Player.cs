@@ -16,6 +16,6 @@ namespace CricketPlayers.Data.Entities
         public string BattingStyle { get; set; }
         public string BowlingStyle { get; set; }
         public int CricInfoId { get; set; }
-        public bool isActive { get; set; }
+        public bool IsActive { get; set; }
     }
 }
