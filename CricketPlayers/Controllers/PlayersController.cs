@@ -19,13 +19,13 @@ namespace CricketPlayers.Controllers
         // GET: Players
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Player.OrderBy(player => player.Name).Take(100).ToListAsync());
+            return View(await _context.Players.OrderBy(player => player.Name).Take(100).ToListAsync());
         }
 
         // GET: Players/Search/rohit
         public async Task<IActionResult> Search(string playerName)
         {
-            var listAsync = await _context.Player.Where(player => player.FullName.Contains(playerName)).ToListAsync();
+            var listAsync = await _context.Players.Where(player => player.FullName.Contains(playerName)).ToListAsync();
             return View(listAsync);
         }
 
@@ -37,7 +37,7 @@ namespace CricketPlayers.Controllers
                 return NotFound();
             }
 
-            var player = await _context.Player
+            var player = await _context.Players
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (player == null)
             {
@@ -77,7 +77,7 @@ namespace CricketPlayers.Controllers
                 return NotFound();
             }
 
-            var player = await _context.Player.FindAsync(id);
+            var player = await _context.Players.FindAsync(id);
             if (player == null)
             {
                 return NotFound();
@@ -128,7 +128,7 @@ namespace CricketPlayers.Controllers
                 return NotFound();
             }
 
-            var player = await _context.Player
+            var player = await _context.Players
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (player == null)
             {
@@ -143,15 +143,15 @@ namespace CricketPlayers.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var player = await _context.Player.FindAsync(id);
-            _context.Player.Remove(player);
+            var player = await _context.Players.FindAsync(id);
+            _context.Players.Remove(player);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PlayerExists(int id)
         {
-            return _context.Player.Any(e => e.Id == id);
+            return _context.Players.Any(e => e.Id == id);
         }
     }
 }
