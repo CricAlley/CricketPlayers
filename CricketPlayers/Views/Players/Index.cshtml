@@ -27,7 +27,7 @@
 
 <table class="table">
     <thead>
-         <tr>
+        <tr>
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
@@ -49,51 +49,57 @@
             <th>
                 @Html.DisplayNameFor(model => model.BowlingStyle)
             </th>
-             <th>
-                 @Html.DisplayNameFor(model => model.CricInfoId)
-             </th>
-             <th>
-                 @Html.DisplayNameFor(model => model.IsActive)
-             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CricInfoId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CricsheetName)
+            </th>
             <th></th>
-         </tr>
+        </tr>
     </thead>
     <tbody>
          @foreach (var item in Model) {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FullName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PlayingRole)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FieldingPosition)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DateOfBirth)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.BattingStyle)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.BowlingStyle)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CricInfoId)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IsActive)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PlayingRole)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FieldingPosition)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateOfBirth)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BattingStyle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlingStyle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CricInfoId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CricsheetName)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
          }
     </tbody>
 </table>
