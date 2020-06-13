@@ -7,7 +7,7 @@
     [BattingStyle]     NVARCHAR (MAX) NULL,
     [BowlingStyle]     NVARCHAR (MAX) NULL,
     [CricInfoId]       INT            NOT NULL,
-    [IsActive]         BIT            DEFAULT ((1)) NULL,
+    [IsActive]         BIT            DEFAULT ((1)) NOT NULL,
     [CricsheetName]    NVARCHAR (MAX) NULL,
     CONSTRAINT [PK_dbo.Players] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
