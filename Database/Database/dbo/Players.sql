@@ -3,7 +3,6 @@
     [Name]             NVARCHAR (MAX) NULL,
     [FullName]         NVARCHAR (MAX) NULL,
     [PlayingRole]      NVARCHAR (MAX) NULL,
-    [FieldingPosition] NVARCHAR (MAX) NULL,
     [DateOfBirth]      DATETIME       NOT NULL,
     [BattingStyle]     NVARCHAR (MAX) NULL,
     [BowlingStyle]     NVARCHAR (MAX) NULL,
