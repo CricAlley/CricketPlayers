@@ -22,9 +22,13 @@ namespace CricketPlayersExcelIngestor
             var fileName =
                 @"D:\Users\NShekhwat\source\Repos\naru1790\CricketPlayers\CricketPlayersExcelIngestor\CricketPlayersExcelIngestor\CricketPlayers.xlsx";
 
+            Console.WriteLine("Loading Data from Excel.");
+
 
             var workbook = WorkBook.Load(fileName);
             var sheet = workbook.WorkSheets.First();
+
+            Console.WriteLine("Excel Data Loaded. Generating Merge Script");
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("IF OBJECT_ID('tempdb..#players') IS NOT NULL");
             stringBuilder.AppendLine("  DROP TABLE #players");
@@ -46,7 +50,6 @@ namespace CricketPlayersExcelIngestor
             stringBuilder.AppendLine(
                 "INSERT INTO #players	([Name], [FullName], [PlayingRole], [DateOfBirth], [BattingStyle], [BowlingStyle], [CricInfoId], [IsActive], [CricsheetName])");
 
-            var id = 0;
 
             var rowsCount = sheet.Rows.Count;
             for (var index = 0; index < rowsCount; index++)
@@ -55,7 +58,7 @@ namespace CricketPlayersExcelIngestor
                 var birthDate = row.Columns[(int) ExcelColumns.BirthDate].DateTimeValue;
                 var isDead = row.Columns[(int) ExcelColumns.Died].StringValue == "Dead";
                 var playingRole = GetPlayingRole(row);
-                if (!birthDate.HasValue || birthDate.Value < minDate || isDead || playingRole == PlayingRole.None)
+                if ( birthDate.GetValueOrDefault() < minDate || isDead || playingRole == PlayingRole.None)
                 {
                     continue;
                 }
@@ -74,13 +77,13 @@ namespace CricketPlayersExcelIngestor
                 if (index < rowsCount - 1)
                 {
                     stringBuilder.AppendLine(
-                        $@"SELECT '{player.Name}' AS Name, '{player.FullName}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
+                        $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
                         $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName UNION ALL");
                 }
                 else
                 {
                     stringBuilder.AppendLine(
-                        $@"SELECT '{player.Name}' AS Name, '{player.FullName}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
+                        $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
                         $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName ");
                 }
             }
@@ -127,6 +130,8 @@ namespace CricketPlayersExcelIngestor
             stringBuilder.AppendLine("END CATCH");
 
             File.WriteAllText("PlayersData.sql", stringBuilder.ToString());
+
+            Console.WriteLine("Player Data script is generated.");
         }
 
         private static PlayingRole GetPlayingRole(RangeRow row)
