@@ -3,7 +3,7 @@
     [Name]             NVARCHAR (MAX) NULL,
     [FullName]         NVARCHAR (MAX) NULL,
     [PlayingRole]      NVARCHAR (MAX) NULL,
-    [DateOfBirth]      DATETIME       NOT NULL,
+    [DateOfBirth]      DATETIME       NULL,
     [BattingStyle]     NVARCHAR (MAX) NULL,
     [BowlingStyle]     NVARCHAR (MAX) NULL,
     [CricInfoId]       INT            NOT NULL,
