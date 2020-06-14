@@ -1,6 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using IronXL;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CricketPlayersExcelIngestor
 {
@@ -9,44 +14,119 @@ namespace CricketPlayersExcelIngestor
         public static DateTime minDate = new DateTime(1965,01,01);
         static void Main(string[] args)
         {
+            DumpDataInFile();
+        }
 
-            var fileName = @"D:\Projects\CricketPlayers\CricketPlayersExcelIngestor\CricketPlayersExcelIngestor\SuperCleaned.xlsx";
+        private static void DumpDataInFile()
+        {
+            var fileName =
+                @"D:\Users\NShekhwat\source\Repos\naru1790\CricketPlayers\CricketPlayersExcelIngestor\CricketPlayersExcelIngestor\CricketPlayers.xlsx";
+
 
             var workbook = WorkBook.Load(fileName);
             var sheet = workbook.WorkSheets.First();
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("IF OBJECT_ID('tempdb..#players') IS NOT NULL");
+            stringBuilder.AppendLine("  DROP TABLE #players");
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("CREATE TABLE #players");
+            stringBuilder.AppendLine("(");
+            stringBuilder.AppendLine("  [Id]            INT             IDENTITY(1, 1) NOT NULL,");
+            stringBuilder.AppendLine("  [Name]          NVARCHAR(MAX)   NULL,");
+            stringBuilder.AppendLine("  [FullName]      NVARCHAR(MAX)   NULL,");
+            stringBuilder.AppendLine("  [PlayingRole]   NVARCHAR(MAX)   NULL,");
+            stringBuilder.AppendLine("  [DateOfBirth]   DATETIME        NOT NULL,");
+            stringBuilder.AppendLine("  [BattingStyle]  NVARCHAR(MAX)   NULL,");
+            stringBuilder.AppendLine("  [BowlingStyle]  NVARCHAR(MAX)   NULL,");
+            stringBuilder.AppendLine("  [CricInfoId]    INT             NOT NULL,");
+            stringBuilder.AppendLine("  [IsActive]      BIT             DEFAULT((1)),");
+            stringBuilder.AppendLine("  [CricsheetName] NVARCHAR(MAX)   NULL,");
+            stringBuilder.AppendLine(");");
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine(
+                "INSERT INTO #players	([Name], [FullName], [PlayingRole], [DateOfBirth], [BattingStyle], [BowlingStyle], [CricInfoId], [IsActive], [CricsheetName])");
 
             var id = 0;
 
-            foreach (var row in sheet.Rows)
+            var rowsCount = sheet.Rows.Count;
+            for (var index = 0; index < rowsCount; index++)
             {
-                var birthDate = row.Columns[(int)ExcelColumns.BirthDate].DateTimeValue;
-                var isDead = row.Columns[(int)ExcelColumns.Died].StringValue == "Dead";
+                var row = sheet.Rows[index];
+                var birthDate = row.Columns[(int) ExcelColumns.BirthDate].DateTimeValue;
+                var isDead = row.Columns[(int) ExcelColumns.Died].StringValue == "Dead";
                 var playingRole = GetPlayingRole(row);
                 if (!birthDate.HasValue || birthDate.Value < minDate || isDead || playingRole == PlayingRole.None)
                 {
-                    Console.WriteLine($"Player Not added : {row.Columns[(int)ExcelColumns.Id].Int32Value}");
                     continue;
                 }
 
                 var player = new Player
                 {
-                    CricInfoId = row.Columns[(int)ExcelColumns.Id].Int32Value,
-                    BattingStyle = row.Columns[(int)ExcelColumns.BattingStyle].StringValue,
-                    BowlingStyle = row.Columns[(int)ExcelColumns.BowlingStyle].StringValue,
+                    CricInfoId = row.Columns[(int) ExcelColumns.Id].Int32Value,
+                    BattingStyle = row.Columns[(int) ExcelColumns.BattingStyle].StringValue,
+                    BowlingStyle = row.Columns[(int) ExcelColumns.BowlingStyle].StringValue,
                     DateOfBirth = birthDate.Value,
-                    FullName = row.Columns[(int)ExcelColumns.FullName].StringValue,
-                    Name = row.Columns[(int)ExcelColumns.Name].StringValue,
+                    FullName = row.Columns[(int) ExcelColumns.FullName].StringValue,
+                    Name = row.Columns[(int) ExcelColumns.Name].StringValue,
                     PlayingRole = playingRole.ToString()
                 };
 
-                using (var context = new CricketPlayersContext())
+                if (index < rowsCount - 1)
                 {
-                    context.Add(player);
-                    context.SaveChanges();
+                    stringBuilder.AppendLine(
+                        $@"SELECT '{player.Name}' AS Name, '{player.FullName}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
+                        $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName UNION ALL");
                 }
-
-                Console.WriteLine($"Player Added : {row.Columns[(int)ExcelColumns.Id].Int32Value}, PlayerName: {player.FullName}");
+                else
+                {
+                    stringBuilder.AppendLine(
+                        $@"SELECT '{player.Name}' AS Name, '{player.FullName}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
+                        $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName ");
+                }
             }
+
+            stringBuilder.AppendLine("BEGIN TRY");
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("  BEGIN TRANSACTION");
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("      MERGE  dbo.players AS TARGET");
+            stringBuilder.AppendLine("          USING #players AS SOURCE");
+            stringBuilder.AppendLine("          ON(TARGET.CricInfoId = SOURCE.CricInfoId)");
+            stringBuilder.AppendLine("              WHEN MATCHED AND TARGET.PlayingRole <> SOURCE.PlayingRole");
+            stringBuilder.AppendLine("              THEN");
+            stringBuilder.AppendLine("                  UPDATE");
+            stringBuilder.AppendLine("                  SET TARGET.PlayingRole = SOURCE.PlayingRole");
+            stringBuilder.AppendLine("              WHEN NOT MATCHED BY TARGET");
+            stringBuilder.AppendLine("              THEN");
+            stringBuilder.AppendLine("                  INSERT(Name");
+            stringBuilder.AppendLine("                        , FullName");
+            stringBuilder.AppendLine("                        , PlayingRole");
+            stringBuilder.AppendLine("                        , DateOfBirth");
+            stringBuilder.AppendLine("                        , BattingStyle");
+            stringBuilder.AppendLine("                        , BowlingStyle");
+            stringBuilder.AppendLine("                        , CricInfoId");
+            stringBuilder.AppendLine("                        , IsActive");
+            stringBuilder.AppendLine("                        , CricsheetName)");
+            stringBuilder.AppendLine("                  VALUES(SOURCE.Name");
+            stringBuilder.AppendLine("                        , SOURCE.FullName");
+            stringBuilder.AppendLine("                        , SOURCE.PlayingRole");
+            stringBuilder.AppendLine("                        , SOURCE.DateOfBirth");
+            stringBuilder.AppendLine("                        , SOURCE.BattingStyle");
+            stringBuilder.AppendLine("                        , SOURCE.BowlingStyle");
+            stringBuilder.AppendLine("                        , SOURCE.CricInfoId");
+            stringBuilder.AppendLine("                        , SOURCE.IsActive");
+            stringBuilder.AppendLine("                        , SOURCE.CricsheetName);");
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("  COMMIT TRANSACTION");
+            stringBuilder.AppendLine("PRINT 'MERGE dbo.Player - Done'");
+            stringBuilder.AppendLine("END TRY");
+            stringBuilder.AppendLine("BEGIN CATCH");
+            stringBuilder.AppendLine("      ROLLBACK TRANSACTION;");
+            stringBuilder.AppendLine("      THROW");
+            stringBuilder.AppendLine("END CATCH");
+
+            File.WriteAllText("PlayersData.sql", stringBuilder.ToString());
         }
 
         private static PlayingRole GetPlayingRole(RangeRow row)
