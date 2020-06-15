@@ -2,10 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using IronXL;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CricketPlayersExcelIngestor
 {
@@ -55,39 +52,60 @@ namespace CricketPlayersExcelIngestor
             for (var index = 0; index < rowsCount; index++)
             {
                 var row = sheet.Rows[index];
-                var birthDate = row.Columns[(int) ExcelColumns.BirthDate].DateTimeValue;
-                var isDead = row.Columns[(int) ExcelColumns.Died].StringValue == "Dead";
                 var playingRole = GetPlayingRole(row);
-                if ( birthDate.GetValueOrDefault() < minDate || isDead || playingRole == PlayingRole.None)
+
+                var cricInfoId = row.Columns[(int)ExcelColumns.Id].Int32Value;
+
+                if (cricInfoId == 0)
                 {
                     continue;
                 }
 
                 var player = new Player
                 {
-                    CricInfoId = row.Columns[(int) ExcelColumns.Id].Int32Value,
+                    CricInfoId = cricInfoId,
                     BattingStyle = row.Columns[(int) ExcelColumns.BattingStyle].StringValue,
                     BowlingStyle = row.Columns[(int) ExcelColumns.BowlingStyle].StringValue,
-                    DateOfBirth = birthDate.Value,
+                    DateOfBirth = row.Columns[(int) ExcelColumns.BirthDate].DateTimeValue,
                     FullName = row.Columns[(int) ExcelColumns.FullName].StringValue,
                     Name = row.Columns[(int) ExcelColumns.Name].StringValue,
                     PlayingRole = playingRole.ToString()
                 };
 
-                if (index < rowsCount - 1)
+                var count = rowsCount - 1;
+                if (index == count)
                 {
-                    stringBuilder.AppendLine(
-                        $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
-                        $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName UNION ALL");
+                    if (player.DateOfBirth == null)
+                    {
+                        stringBuilder.AppendLine(
+                            $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, NULL AS DateofBirth," +
+                            $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName");
+                    }
+                    else
+                    {
+                        stringBuilder.AppendLine(
+                            $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
+                            $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName");
+                    }
                 }
                 else
                 {
-                    stringBuilder.AppendLine(
-                        $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
-                        $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName ");
+                    if (player.DateOfBirth == null)
+                    {
+                        stringBuilder.AppendLine(
+                            $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, NULL AS DateofBirth," +
+                            $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName UNION ALL");
+                    }
+                    else
+                    {
+                        stringBuilder.AppendLine(
+                            $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
+                            $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName UNION ALL");
+                    }
                 }
             }
 
+            stringBuilder.AppendLine("");
             stringBuilder.AppendLine("BEGIN TRY");
             stringBuilder.AppendLine("");
             stringBuilder.AppendLine("  BEGIN TRANSACTION");

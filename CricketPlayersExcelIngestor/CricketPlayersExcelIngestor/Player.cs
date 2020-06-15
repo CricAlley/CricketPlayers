@@ -12,7 +12,7 @@ namespace CricketPlayersExcelIngestor
         public string FieldingPosition { get; set; }
 
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public string BattingStyle { get; set; }
         public string BowlingStyle { get; set; }
         public int CricInfoId { get; set; }
