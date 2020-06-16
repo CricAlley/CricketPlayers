@@ -10,7 +10,7 @@ namespace CricketPlayers.Data.Entities
         public string FullName { get; set; }
         public string PlayingRole { get; set; }
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public string BattingStyle { get; set; }
         public string BowlingStyle { get; set; }
         public int CricInfoId { get; set; }
