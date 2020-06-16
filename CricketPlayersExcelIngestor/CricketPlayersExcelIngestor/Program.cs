@@ -8,7 +8,7 @@ namespace CricketPlayersExcelIngestor
 {
     class Program
     {
-        public static DateTime minDate = new DateTime(1965,01,01);
+        public static DateTime minDate = new DateTime(1950,01,01);
         static void Main(string[] args)
         {
             DumpDataInFile();
@@ -36,7 +36,7 @@ namespace CricketPlayersExcelIngestor
             stringBuilder.AppendLine("  [Name]          NVARCHAR(MAX)   NULL,");
             stringBuilder.AppendLine("  [FullName]      NVARCHAR(MAX)   NULL,");
             stringBuilder.AppendLine("  [PlayingRole]   NVARCHAR(MAX)   NULL,");
-            stringBuilder.AppendLine("  [DateOfBirth]   DATETIME        NOT NULL,");
+            stringBuilder.AppendLine("  [DateOfBirth]   DATETIME        NULL,");
             stringBuilder.AppendLine("  [BattingStyle]  NVARCHAR(MAX)   NULL,");
             stringBuilder.AppendLine("  [BowlingStyle]  NVARCHAR(MAX)   NULL,");
             stringBuilder.AppendLine("  [CricInfoId]    INT             NOT NULL,");
@@ -48,32 +48,56 @@ namespace CricketPlayersExcelIngestor
                 "INSERT INTO #players	([Name], [FullName], [PlayingRole], [DateOfBirth], [BattingStyle], [BowlingStyle], [CricInfoId], [IsActive], [CricsheetName])");
 
 
-            var rowsCount = sheet.Rows.Count;
-            for (var index = 0; index < rowsCount; index++)
+            var players = sheet.Rows.Where(row =>
             {
-                var row = sheet.Rows[index];
-                var playingRole = GetPlayingRole(row);
 
-                var cricInfoId = row.Columns[(int)ExcelColumns.Id].Int32Value;
+                var birthDate = row.Columns[(int)ExcelColumns.BirthDate].DateTimeValue;
+                var isDead = row.Columns[(int)ExcelColumns.Died].StringValue == "Dead";
+                return GetPlayingRole(row) != PlayingRole.None && (!birthDate.HasValue || birthDate.Value > minDate) &&
+                       !isDead;
+            }).Select(row => new Player
+            {
+                CricInfoId = row.Columns[(int)ExcelColumns.Id].Int32Value,
+                BattingStyle = row.Columns[(int)ExcelColumns.BattingStyle].StringValue,
+                BowlingStyle = row.Columns[(int)ExcelColumns.BowlingStyle].StringValue,
+                DateOfBirth = row.Columns[(int)ExcelColumns.BirthDate].DateTimeValue,
+                FullName = row.Columns[(int)ExcelColumns.FullName].StringValue,
+                Name = row.Columns[(int)ExcelColumns.Name].StringValue,
+                PlayingRole = GetPlayingRole(row).ToString()
+            }).ToArray();
 
-                if (cricInfoId == 0)
+            Console.WriteLine($"Where condition executed. {players.Length} players will be added to the script.");
+
+            var lastPlayerIndex = players.Length - 1;
+
+            for (var index = 0; index < players.Length; index++)
+            {
+                var player = players[index];
+
+                var canSplitBatch = index % 1000 == 0;
+                if (canSplitBatch)
                 {
-                    continue;
+                    if (player.DateOfBirth == null)
+                    {
+                        stringBuilder.AppendLine(
+                            $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, NULL AS DateofBirth," +
+                            $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName");
+                    }
+                    else
+                    {
+                        stringBuilder.AppendLine(
+                            $@"SELECT '{player.Name.Replace("'", "''")}' AS Name, '{player.FullName.Replace("'", "''")}' AS FullName, '{player.PlayingRole}' AS PlayingRole, '{player.DateOfBirth}' AS DateofBirth," +
+                            $@" '{player.BattingStyle}' AS BattingStyle, '{player.BowlingStyle}' AS BowlingStyle, '{player.CricInfoId}' AS CricInfoId, 1 AS IsActive, NULL AS CricsheetName");
+                    }
+
+                    stringBuilder.AppendLine("Go");
+
+                    stringBuilder.AppendLine();
+
+                    stringBuilder.AppendLine(
+                        "INSERT INTO #players	([Name], [FullName], [PlayingRole], [DateOfBirth], [BattingStyle], [BowlingStyle], [CricInfoId], [IsActive], [CricsheetName])");
                 }
-
-                var player = new Player
-                {
-                    CricInfoId = cricInfoId,
-                    BattingStyle = row.Columns[(int) ExcelColumns.BattingStyle].StringValue,
-                    BowlingStyle = row.Columns[(int) ExcelColumns.BowlingStyle].StringValue,
-                    DateOfBirth = row.Columns[(int) ExcelColumns.BirthDate].DateTimeValue,
-                    FullName = row.Columns[(int) ExcelColumns.FullName].StringValue,
-                    Name = row.Columns[(int) ExcelColumns.Name].StringValue,
-                    PlayingRole = playingRole.ToString()
-                };
-
-                var count = rowsCount - 1;
-                if (index == count)
+                else if (index == lastPlayerIndex)
                 {
                     if (player.DateOfBirth == null)
                     {
