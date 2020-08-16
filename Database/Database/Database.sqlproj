@@ -60,5 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Players.sql" />
+    <Build Include="dbo\PlayerAliasMapping.sql" />
+    <Build Include="dbo\ExcludedTeams.sql" />
   </ItemGroup>
 </Project>
