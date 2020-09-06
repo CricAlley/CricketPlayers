@@ -1,2 +1,2 @@
 #!/bin/bash
-sqlpackage /a:Publish /tcs:"$1" /sf:"$(2)/Database.dacpac"
+sqlpackage /a:Publish /tcs:"$1" /sf:"$2/Database.dacpac"
