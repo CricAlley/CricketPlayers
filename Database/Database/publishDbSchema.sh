@@ -1,2 +1,3 @@
 #!/bin/bash
-sqlpackage /a:Publish /tcs:"$1" /sf:"$2/Database.dacpac"
+sudo ls
+sqlpackage /a:Publish /tcs:"$1" /sf:Database.dacpac
