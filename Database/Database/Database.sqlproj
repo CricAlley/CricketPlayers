@@ -65,8 +65,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Database.publish.xml" />
-    <None Include="publishdbschema.sh">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="publishdbschema.sh" />
   </ItemGroup>
 </Project>
