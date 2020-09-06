@@ -3,3 +3,6 @@ sqlpackage /a:Publish /tcs:"$CONNECTIONSTRINGS_CRICKETDB" /sf:Database.dacpac
 sqlpackage /a:Publish /tcs:$CONNECTIONSTRINGS_CRICKETDB /sf:Database.dacpac
 sqlpackage /a:Publish /tcs:"$(CONNECTIONSTRINGS_CRICKETDB)" /sf:Database.dacpac
 sqlpackage /a:Publish /tcs:$(CONNECTIONSTRINGS_CRICKETDB) /sf:Database.dacpac
+sqlpackage /a:Publish /tcs:$ConnectionStrings.CricketDB /sf:Database.dacpac
+sqlpackage /a:Publish /tcs:"$(ConnectionStrings.CricketDB)" /sf:Database.dacpac
+sqlpackage /a:Publish /tcs:$(ConnectionStrings.CricketDB) /sf:Database.dacpac
