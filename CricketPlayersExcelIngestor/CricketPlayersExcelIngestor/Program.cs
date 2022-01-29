@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using IronXL;
 
@@ -8,10 +9,140 @@ namespace CricketPlayersExcelIngestor
 {
     class Program
     {
+        private const string peopleFile = "people.csv";
+        private const string namesFile = "names.csv";
         public static DateTime minDate = new DateTime(1950,01,01);
         static void Main(string[] args)
         {
-            DumpDataInFile();
+            // DumpDataInFile();
+
+            StorePlayerRegistry();
+        }
+
+        private static void StorePlayerRegistry()
+        {
+            WebClient wc = new WebClient();
+            using (MemoryStream stream = new MemoryStream(wc.DownloadData("https://cricsheet.org/register/people.csv")))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    reader.ReadLine();
+                    var text = reader.ReadToEnd();
+                    File.WriteAllText(peopleFile, text);                   
+
+                }
+            }
+
+            using (MemoryStream stream = new MemoryStream(wc.DownloadData("https://cricsheet.org/register/names.csv")))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    reader.ReadLine();
+                    var text = reader.ReadToEnd();
+                    File.WriteAllText(namesFile, text);
+
+                }
+            }
+
+            var peopleSheet = WorkBook.Load(peopleFile).WorkSheets.First();
+            var namesSheet = WorkBook.Load(namesFile).WorkSheets.First();
+
+            Console.WriteLine("Excel Data Loaded. Generating Merge Script");
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("IF OBJECT_ID('tempdb..#playerRegister') IS NOT NULL");
+            stringBuilder.AppendLine("  DROP TABLE #playerRegister");
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("CREATE TABLE #playerRegister");
+            stringBuilder.AppendLine("(");
+            stringBuilder.AppendLine("  [Id]            INT             IDENTITY(1, 1) NOT NULL,");
+            stringBuilder.AppendLine("  [Identifier]    VARCHAR(100)   NOT NULL,");
+            stringBuilder.AppendLine("  [UniqueName]      VARCHAR(100)   NOT NULL,");
+            stringBuilder.AppendLine("  [Names]   VARCHAR(1000)   NULL,");
+            stringBuilder.AppendLine("  [CricInfoId]    INT             NOT NULL,");
+            stringBuilder.AppendLine("  [IsActive]      BIT             DEFAULT((1)),");
+            stringBuilder.AppendLine(");");
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine(
+                "INSERT INTO #playerRegister	([Identifier], [UniqueName], [Names], [CricInfoId], [IsActive])");
+
+            var names = namesSheet.Rows.Select(r => new Names
+                        {
+                            Identifier = r.Columns[(int)namesColumns.Identifier].StringValue,
+                            Name = r.Columns[(int)namesColumns.Name].StringValue,
+                        }).ToList();
+
+            var people = peopleSheet.Rows.Select( r => new PlayerRegistry
+                                {
+                                    Identifier = r.Columns[(int)PeopleSheetColumns.Identifier].StringValue,                                    
+                                    UniqueName = r.Columns[(int)PeopleSheetColumns.UniqueName].StringValue,
+                                    CricInfoId = r.Columns[(int)PeopleSheetColumns.CricInfoId].Int32Value
+                                }).ToList();
+
+
+            var lastPlayerIndex = people.Count() - 1;
+
+            for (var index = 0; index <= lastPlayerIndex; index++)
+            {
+                var person = people[index];    
+                
+                if(person.CricInfoId == 0)
+                {
+                    continue;
+                }
+
+                person.Names = string.Join(", ", names.Where(n => n.Identifier.Equals(person.Identifier)).Select(n => n.Name));
+                if(index == lastPlayerIndex)
+                {
+                    stringBuilder.AppendLine(
+                           $@"SELECT '{person.Identifier}' AS Identifier, '{person.UniqueName.Replace("'", "''")}' AS UniqueName, '{person.Names.Replace("'", "''")}' AS Names," +
+                           $@" '{person.CricInfoId}' AS CricInfoId, 1 AS IsActive");
+                }
+                else
+                {
+                    stringBuilder.AppendLine(
+                           $@"SELECT '{person.Identifier}' AS Identifier, '{person.UniqueName.Replace("'", "''")}' AS UniqueName, '{person.Names.Replace("'", "''")}' AS Names," +
+                           $@" '{person.CricInfoId}' AS CricInfoId, 1 AS IsActive UNION ALL");
+                }
+
+            }
+
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("BEGIN TRY");
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("  BEGIN TRANSACTION");
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("      MERGE  dbo.playerRegister AS TARGET");
+            stringBuilder.AppendLine("          USING #playerRegister AS SOURCE");
+            stringBuilder.AppendLine("          ON(TARGET.Identifier = SOURCE.Identifier)");
+            stringBuilder.AppendLine("              WHEN MATCHED AND TARGET.CricInfoId <> SOURCE.CricInfoId");
+            stringBuilder.AppendLine("              THEN");
+            stringBuilder.AppendLine("                  UPDATE");
+            stringBuilder.AppendLine("                  SET TARGET.CricInfoId = SOURCE.PlayingRole");
+            stringBuilder.AppendLine("              WHEN NOT MATCHED BY TARGET");
+            stringBuilder.AppendLine("              THEN");
+            stringBuilder.AppendLine("                  INSERT(Identifier");
+            stringBuilder.AppendLine("                        , UniqueName");
+            stringBuilder.AppendLine("                        , Names");
+            stringBuilder.AppendLine("                        , CricInfoId");
+            stringBuilder.AppendLine("                        , IsActive)");
+            stringBuilder.AppendLine("                  VALUES(SOURCE.Identifier");
+            stringBuilder.AppendLine("                        , SOURCE.UniqueName");
+            stringBuilder.AppendLine("                        , SOURCE.Names");
+            stringBuilder.AppendLine("                        , SOURCE.CricInfoId");
+            stringBuilder.AppendLine("                        , SOURCE.IsActive)");
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine("  COMMIT TRANSACTION");
+            stringBuilder.AppendLine("PRINT 'MERGE dbo.playerRegister - Done'");
+            stringBuilder.AppendLine("END TRY");
+            stringBuilder.AppendLine("BEGIN CATCH");
+            stringBuilder.AppendLine("      ROLLBACK TRANSACTION;");
+            stringBuilder.AppendLine("      THROW");
+            stringBuilder.AppendLine("END CATCH");
+
+            File.WriteAllText("playerRegister.sql", stringBuilder.ToString());
+
+            Console.WriteLine("playerRegister script is generated.");
         }
 
         private static void DumpDataInFile()
@@ -55,7 +186,7 @@ namespace CricketPlayersExcelIngestor
                 var isDead = row.Columns[(int)ExcelColumns.Died].StringValue == "Dead";
                 return GetPlayingRole(row) != PlayingRole.None && (!birthDate.HasValue || birthDate.Value > minDate) &&
                        !isDead;
-            }).Select(row => new Player
+            }).Select(row => new Player1
             {
                 CricInfoId = row.Columns[(int)ExcelColumns.Id].Int32Value,
                 BattingStyle = row.Columns[(int)ExcelColumns.BattingStyle].StringValue,
@@ -452,6 +583,20 @@ namespace CricketPlayersExcelIngestor
         BOWLING_T20s_4w,
         BOWLING_T20s_5w,
         BOWLING_T20s_10
+    }
+
+    public  enum  PeopleSheetColumns : int
+    {
+        Identifier = 0,
+        Name = 1,
+        UniqueName = 2,
+        CricInfoId =6
+    }
+
+    public enum  namesColumns : int
+    {
+        Identifier = 0,
+        Name = 1,
     }
 
 }

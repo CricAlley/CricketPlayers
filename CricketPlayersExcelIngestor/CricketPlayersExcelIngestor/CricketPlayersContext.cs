@@ -4,12 +4,12 @@ namespace CricketPlayersExcelIngestor
 {
     public class CricketPlayersContext : DbContext
     {
-        public DbSet<Player> Player { get; set; }
+        public DbSet<PlayerRegistry> Player { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(
-                @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\Projects\CricketPlayers\CricketPlayers.Data\Player.mdf;Integrated Security=True;Connect Timeout=30");
+                @"Data Source=LAPTOP-3AQTASAE\SQLEXPRESS;Initial Catalog=CricketPlayers;Integrated Security=True");
         }
     }
 }
