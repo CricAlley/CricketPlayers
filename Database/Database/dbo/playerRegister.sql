@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[PlayerRegister]
 (
-	[Id] INT NOT NULL PRIMARY KEY, 
+	[Id]               INT            IDENTITY (1, 1) NOT NULL, 
     [Identifier] VARCHAR(100) NOT NULL, 
     [UniqueName] VARCHAR(100) NOT NULL, 
     [Names] VARCHAR(1000) NULL, 
