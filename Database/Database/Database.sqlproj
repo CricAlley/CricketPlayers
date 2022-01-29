@@ -63,11 +63,15 @@
     <Build Include="dbo\Players.sql" />
     <Build Include="dbo\PlayerAliasMapping.sql" />
     <Build Include="dbo\ExcludedTeams.sql" />
+    <Build Include="dbo\playerRegister.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Database.publish.xml" />
     <None Include="publishdbschema.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Database.refactorlog" />
   </ItemGroup>
 </Project>
