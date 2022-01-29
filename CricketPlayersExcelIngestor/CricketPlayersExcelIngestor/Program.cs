@@ -117,7 +117,7 @@ namespace CricketPlayersExcelIngestor
             stringBuilder.AppendLine("              WHEN MATCHED AND TARGET.CricInfoId <> SOURCE.CricInfoId");
             stringBuilder.AppendLine("              THEN");
             stringBuilder.AppendLine("                  UPDATE");
-            stringBuilder.AppendLine("                  SET TARGET.CricInfoId = SOURCE.PlayingRole");
+            stringBuilder.AppendLine("                  SET TARGET.CricInfoId = SOURCE.CricInfoId");
             stringBuilder.AppendLine("              WHEN NOT MATCHED BY TARGET");
             stringBuilder.AppendLine("              THEN");
             stringBuilder.AppendLine("                  INSERT(Identifier");
@@ -140,7 +140,7 @@ namespace CricketPlayersExcelIngestor
             stringBuilder.AppendLine("      THROW");
             stringBuilder.AppendLine("END CATCH");
 
-            File.WriteAllText("playerRegister.sql", stringBuilder.ToString());
+            File.WriteAllText("PlayerRegister.sql", stringBuilder.ToString());
 
             Console.WriteLine("playerRegister script is generated.");
         }
