@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[playerRegister]
+﻿CREATE TABLE [dbo].[PlayerRegister]
 (
 	[Id] INT NOT NULL PRIMARY KEY, 
     [Identifier] VARCHAR(100) NOT NULL, 
