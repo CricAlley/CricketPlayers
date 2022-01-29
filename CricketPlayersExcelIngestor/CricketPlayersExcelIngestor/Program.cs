@@ -129,7 +129,7 @@ namespace CricketPlayersExcelIngestor
             stringBuilder.AppendLine("                        , SOURCE.UniqueName");
             stringBuilder.AppendLine("                        , SOURCE.Names");
             stringBuilder.AppendLine("                        , SOURCE.CricInfoId");
-            stringBuilder.AppendLine("                        , SOURCE.IsActive)");
+            stringBuilder.AppendLine("                        , SOURCE.IsActive);");
             stringBuilder.AppendLine("");
             stringBuilder.AppendLine("");
             stringBuilder.AppendLine("  COMMIT TRANSACTION");
