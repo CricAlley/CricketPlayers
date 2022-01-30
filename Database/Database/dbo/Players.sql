@@ -9,5 +9,6 @@
     [CricInfoId]       INT            NOT NULL,
     [IsActive]         BIT            DEFAULT ((1)) NOT NULL,
     [CricsheetName]    NVARCHAR (MAX) NULL,
+    [Identifier] VARCHAR(50) NULL, 
     CONSTRAINT [PK_dbo.Players] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
