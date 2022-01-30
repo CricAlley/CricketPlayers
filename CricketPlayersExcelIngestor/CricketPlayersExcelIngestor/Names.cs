@@ -1,8 +1,19 @@
-﻿namespace CricketPlayersExcelIngestor
+﻿using CsvHelper.Configuration;
+
+namespace CricketPlayersExcelIngestor
 {
-    internal class Names
+    public class Names
     {
-        public string Identifier { get; internal set; }
-        public string Name { get; internal set; }
+        public string Identifier { get;  set; }
+        public string Name { get;  set; }
+    }
+
+    public class NamesMap : ClassMap<Names>
+    {
+        public NamesMap()
+        {
+            Map(m => m.Identifier).Index(0);
+            Map(m => m.Name).Index(1);
+        }
     }
 }
