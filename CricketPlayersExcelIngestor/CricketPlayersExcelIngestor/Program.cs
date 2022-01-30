@@ -111,7 +111,7 @@ namespace CricketPlayersExcelIngestor
             stringBuilder.AppendLine("");
             stringBuilder.AppendLine("  BEGIN TRANSACTION");
             stringBuilder.AppendLine("");
-            stringBuilder.AppendLine("      MERGE  dbo.playerRegister AS TARGET");
+            stringBuilder.AppendLine("      MERGE  dbo.PlayerRegister AS TARGET");
             stringBuilder.AppendLine("          USING #playerRegister AS SOURCE");
             stringBuilder.AppendLine("          ON(TARGET.Identifier = SOURCE.Identifier)");
             stringBuilder.AppendLine("              WHEN MATCHED AND TARGET.CricInfoId <> SOURCE.CricInfoId");
