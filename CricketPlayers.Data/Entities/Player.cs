@@ -16,5 +16,6 @@ namespace CricketPlayers.Data.Entities
         public int CricInfoId { get; set; }
         public bool IsActive { get; set; }
         public string CricsheetName { get; set; }
+        public string Identifier { get; set; }
     }
 }
