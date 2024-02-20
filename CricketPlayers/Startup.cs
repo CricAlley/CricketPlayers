@@ -31,7 +31,7 @@ namespace CricketPlayers
             services.Configure<MvcOptions>(opt => opt.EnableEndpointRouting = false);
 
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
+            services.AddMvc();
 
             services.AddDbContext<CricketPlayersContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("CricketPlayersContext")));
